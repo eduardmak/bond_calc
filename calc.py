@@ -4,10 +4,10 @@ def filter_no_characters(input_str):
     no_spechar_str = re.sub('[-,./:;]', "", input_str).strip()
     return no_spechar_str
 
-macaddress_source = filter_no_characters(input("Введите source MAC-адрес "))
-macaddress_destination = filter_no_characters(input("Введите destionation MAC-адрес "))
-ip_source = filter_no_characters(input("Введите source IP адрес "))
-ip_destination = filter_no_characters(input("Введите destination IP адрес "))
+macaddress_source = filter_no_characters(input("Введите source MAC-адрес: "))
+macaddress_destination = filter_no_characters(input("Введите destionation MAC-адрес: "))
+ip_source = filter_no_characters(input("Введите source IP адрес: "))
+ip_destination = filter_no_characters(input("Введите destination IP адрес: "))
 slave_count = int(filter_no_characters(input("Введите кол-во интерфейсов в бонде: ")))
 
 ip_source_10x = int(ip_source,10)
@@ -19,7 +19,7 @@ macaddress_destination_16x = int(macaddress_destination, 16)
 macaddress_source_10x = int(str(macaddress_source_16x),10)
 macaddress_destination_10x = int(str(macaddress_destination_16x),10)
 
-# 0xffff это 16ричная система в десятичной будет 65535 это reserved ethertype
+# 0xffff это 16ричная система в десятичной будет 65535 это reserved ethertype - поэтому эта формула обобщенная
 # (((source IP XOR dest IP) AND 0xffff) XOR ( source MAC XOR destination MAC )) modulo slave count
 
 interface = (((ip_source_10x ^ ip_destination_10x) & 65535) ^ (macaddress_source_10x ^ macaddress_destination_10x))% slave_count
@@ -31,8 +31,7 @@ print("По первой формуле трафик будет идти по и
 # hash2 = hash1 XOR source IP XOR destination IP
 # hash3 = hash2 XOR (hash2 RSHIFT 16)
 # hash4 = hash3 XOR (hash3 RSHIFT 8)
-
-# в качестве пакет айди использую не зарезервированный, ethertype для ip 0x0800
+# в качестве пакет айди использую ethertype для ip 0x0800, для icmp будет он же
 packet_type_ID = 2048
 
 hash1 = macaddress_source_10x ^ macaddress_destination_10x ^ packet_type_ID
