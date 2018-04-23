@@ -1,7 +1,7 @@
 import re
 
-def filter_no_characters(input):
-    no_spechar_str = re.sub('[-,./:;]', "", input).strip()
+def filter_no_characters(input_str):
+    no_spechar_str = re.sub('[-,./:;]', "", input_str).strip()
     return no_spechar_str
 
 macaddress_source = filter_no_characters(input("Введите source MAC-адрес "))
