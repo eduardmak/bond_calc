@@ -1,0 +1,36 @@
+
+# ВЫДЕРЖКА ИЗ ФАИЛА ЯДРА 4.17 drivers/net/bonding/bond_main.c
+# static inline u32 bond_eth_hash(struct sk_buff *skb)
+# {
+# 	struct ethhdr *ep, hdr_tmp;
+#
+# 	ep = skb_header_pointer(skb, 0, sizeof(hdr_tmp), &hdr_tmp);
+# 	if (ep)
+# 		return ep->h_dest[5] ^ ep->h_source[5] ^ ep->h_proto;
+# 	return 0;
+# }
+##u32 bond_xmit_hash(struct bonding *bond, struct sk_buff *skb)
+# {
+# 	struct flow_keys flow;
+# 	u32 hash;
+#
+# 	if (bond->params.xmit_policy == BOND_XMIT_POLICY_ENCAP34 &&
+# 	    skb->l4_hash)
+# 		return skb->hash;
+#
+# 	if (bond->params.xmit_policy == BOND_XMIT_POLICY_LAYER2 ||
+# 	    !bond_flow_dissect(bond, skb, &flow))
+# 		return bond_eth_hash(skb);
+#
+# 	if (bond->params.xmit_policy == BOND_XMIT_POLICY_LAYER23 ||
+# 	    bond->params.xmit_policy == BOND_XMIT_POLICY_ENCAP23)
+# 		hash = bond_eth_hash(skb);
+# 	else
+# 		hash = (__force u32)flow.ports.ports;
+# 	hash ^= (__force u32)flow_get_u32_dst(&flow) ^
+# 		(__force u32)flow_get_u32_src(&flow);
+# 	hash ^= (hash >> 16);
+# 	hash ^= (hash >> 8);
+#
+# 	return hash >> 1;
+# }
